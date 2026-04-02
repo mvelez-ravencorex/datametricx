@@ -1,0 +1,192 @@
+{
+  "name": "meta_ads",
+  "label": "Meta Ads Ads",
+  "description": "Ad level metadata and creative configuration",
+  "category": "advertising",
+  "source": {
+    "type": "bigquery",
+    "project": "datametricx-prod",
+    "dataset": "reporting",
+    "table": "meta_ads"
+  },
+  "primary_key": ["ad_id"],
+
+  "dimensions": [
+    {
+      "name": "ad_id",
+      "label": "Ad ID",
+      "type": "string",
+      "description": "Unique identifier for the ad",
+      "sql": "${TABLE}.ad_id",
+      "primary_key": true
+    },
+    {
+      "name": "ad_name",
+      "label": "Ad Name",
+      "type": "string",
+      "description": "Name of the ad",
+      "sql": "${TABLE}.ad_name"
+    },
+    {
+      "name": "adset_id",
+      "label": "Ad Set ID",
+      "type": "string",
+      "description": "Parent ad set ID",
+      "sql": "${TABLE}.adset_id"
+    },
+    {
+      "name": "campaign_id",
+      "label": "Campaign ID",
+      "type": "string",
+      "description": "Parent campaign ID",
+      "sql": "${TABLE}.campaign_id"
+    },
+    {
+      "name": "status",
+      "label": "Status",
+      "type": "string",
+      "description": "Current status of the ad",
+      "sql": "${TABLE}.status"
+    },
+    {
+      "name": "creative_id",
+      "label": "Creative ID",
+      "type": "string",
+      "description": "Associated creative ID",
+      "sql": "${TABLE}.creative_id"
+    },
+    {
+      "name": "effective_status",
+      "label": "Effective Status",
+      "type": "string",
+      "description": "Effective status considering parent entities",
+      "sql": "${TABLE}.effective_status"
+    },
+    {
+      "name": "bid_type",
+      "label": "Bid Type",
+      "type": "string",
+      "description": "Type of bidding",
+      "sql": "${TABLE}.bid_type"
+    }
+  ],
+
+  "dimension_groups": [
+    {
+      "name": "created_time",
+      "label": "Created",
+      "type": "time",
+      "description": "When the ad was created",
+      "sql": "${TABLE}.created_time",
+      "timeframes": ["raw", "time", "datetime", "date", "week", "month", "quarter", "year"],
+      "datatype": "timestamp"
+    },
+    {
+      "name": "updated_time",
+      "label": "Updated",
+      "type": "time",
+      "description": "When the ad was last updated",
+      "sql": "${TABLE}.updated_time",
+      "timeframes": ["raw", "time", "datetime", "date", "week", "month", "quarter", "year"],
+      "datatype": "timestamp"
+    },
+    {
+      "name": "extracted_at",
+      "label": "Extracted",
+      "type": "time",
+      "description": "When the data was extracted",
+      "sql": "${TABLE}.extracted_at",
+      "timeframes": ["raw", "time", "datetime", "date", "week", "month", "quarter", "year"],
+      "datatype": "timestamp"
+    },
+    {
+      "name": "_ingestion_time",
+      "label": "Ingestion Time",
+      "type": "time",
+      "description": "When the data was ingested into BigQuery",
+      "sql": "${TABLE}._ingestion_time",
+      "timeframes": ["raw", "time", "datetime", "date", "week", "month", "quarter", "year"],
+      "datatype": "timestamp"
+    }
+  ],
+
+  "measures": [
+    {
+      "name": "count",
+      "label": "Ad Count",
+      "type": "count",
+      "description": "Number of ads",
+      "sql": "1",
+      "value_format": "#,##0"
+    },
+    {
+      "name": "count_active",
+      "label": "Active Ad Count",
+      "type": "count",
+      "description": "Number of active ads",
+      "sql": "CASE WHEN ${status} = 'ACTIVE' THEN 1 END",
+      "value_format": "#,##0"
+    }
+  ],
+
+  "calculations": [
+    {
+      "name": "is_active",
+      "label": "Is Active",
+      "type": "yesno",
+      "description": "Whether ad is currently active",
+      "sql": "${status} = 'ACTIVE'"
+    },
+    {
+      "name": "is_effectively_active",
+      "label": "Is Effectively Active",
+      "type": "yesno",
+      "description": "Whether ad is effectively running",
+      "sql": "${effective_status} = 'ACTIVE'"
+    },
+    {
+      "name": "days_since_created",
+      "label": "Days Since Created",
+      "type": "number",
+      "description": "Number of days since ad was created",
+      "sql": "DATE_DIFF(CURRENT_DATE(), DATE(${TABLE}.created_time), DAY)",
+      "value_format": "#,##0"
+    },
+    {
+      "name": "days_since_updated",
+      "label": "Days Since Updated",
+      "type": "number",
+      "description": "Number of days since ad was updated",
+      "sql": "DATE_DIFF(CURRENT_DATE(), DATE(${TABLE}.updated_time), DAY)",
+      "value_format": "#,##0"
+    }
+  ],
+
+  "filters": [
+    {
+      "name": "status_filter",
+      "label": "Status",
+      "type": "string",
+      "field": "status",
+      "allowed_values": ["ACTIVE", "PAUSED", "ARCHIVED", "DELETED"]
+    },
+    {
+      "name": "effective_status_filter",
+      "label": "Effective Status",
+      "type": "string",
+      "field": "effective_status"
+    },
+    {
+      "name": "adset_filter",
+      "label": "Ad Set ID",
+      "type": "string",
+      "field": "adset_id"
+    },
+    {
+      "name": "campaign_filter",
+      "label": "Campaign ID",
+      "type": "string",
+      "field": "campaign_id"
+    }
+  ]
+}

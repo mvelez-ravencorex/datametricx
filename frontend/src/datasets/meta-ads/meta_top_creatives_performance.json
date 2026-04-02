@@ -1,0 +1,341 @@
+{
+  "name": "meta_top_creatives_performance",
+  "label": "Top Creatives Performance",
+  "description": "Performance metrics for top-performing creative assets",
+  "category": "advertising",
+  "source": {
+    "type": "bigquery",
+    "project": "datametricx-prod",
+    "dataset": "reporting",
+    "table": "meta_top_creatives_performance"
+  },
+  "primary_key": ["creative_id", "ad_id"],
+
+  "dimensions": [
+    {
+      "name": "tenant_id",
+      "label": "Tenant ID",
+      "type": "string",
+      "description": "Tenant identifier",
+      "sql": "${TABLE}.tenant_id",
+      "hidden": true
+    },
+    {
+      "name": "account_id",
+      "label": "Account ID",
+      "type": "string",
+      "description": "Meta Ads account identifier",
+      "sql": "${TABLE}.account_id"
+    },
+    {
+      "name": "creative_id",
+      "label": "Creative ID",
+      "type": "string",
+      "description": "Unique identifier for the creative",
+      "sql": "${TABLE}.creative_id",
+      "primary_key": true
+    },
+    {
+      "name": "creative_name",
+      "label": "Creative Name",
+      "type": "string",
+      "description": "Name of the creative",
+      "sql": "${TABLE}.creative_name"
+    },
+    {
+      "name": "ad_id",
+      "label": "Ad ID",
+      "type": "string",
+      "description": "Associated ad ID",
+      "sql": "${TABLE}.ad_id"
+    },
+    {
+      "name": "ad_name",
+      "label": "Ad Name",
+      "type": "string",
+      "description": "Name of the associated ad",
+      "sql": "${TABLE}.ad_name"
+    },
+    {
+      "name": "adset_id",
+      "label": "Ad Set ID",
+      "type": "string",
+      "description": "Parent ad set ID",
+      "sql": "${TABLE}.adset_id"
+    },
+    {
+      "name": "adset_name",
+      "label": "Ad Set Name",
+      "type": "string",
+      "description": "Name of the parent ad set",
+      "sql": "${TABLE}.adset_name"
+    },
+    {
+      "name": "campaign_id",
+      "label": "Campaign ID",
+      "type": "string",
+      "description": "Parent campaign ID",
+      "sql": "${TABLE}.campaign_id"
+    },
+    {
+      "name": "campaign_name",
+      "label": "Campaign Name",
+      "type": "string",
+      "description": "Name of the parent campaign",
+      "sql": "${TABLE}.campaign_name"
+    },
+    {
+      "name": "object_type",
+      "label": "Creative Type",
+      "type": "string",
+      "description": "Type of creative (IMAGE, VIDEO, CAROUSEL, etc.)",
+      "sql": "${TABLE}.object_type"
+    },
+    {
+      "name": "title",
+      "label": "Title",
+      "type": "string",
+      "description": "Creative title text",
+      "sql": "${TABLE}.title"
+    },
+    {
+      "name": "body",
+      "label": "Body",
+      "type": "string",
+      "description": "Creative body text",
+      "sql": "${TABLE}.body"
+    },
+    {
+      "name": "call_to_action_type",
+      "label": "CTA Type",
+      "type": "string",
+      "description": "Type of call-to-action button",
+      "sql": "${TABLE}.call_to_action_type"
+    },
+    {
+      "name": "image_url",
+      "label": "Image URL",
+      "type": "string",
+      "description": "URL of the creative image",
+      "sql": "${TABLE}.image_url"
+    },
+    {
+      "name": "video_id",
+      "label": "Video ID",
+      "type": "string",
+      "description": "ID of the video if applicable",
+      "sql": "${TABLE}.video_id"
+    },
+    {
+      "name": "thumbnail_url",
+      "label": "Thumbnail URL",
+      "type": "string",
+      "description": "Thumbnail image URL",
+      "sql": "${TABLE}.thumbnail_url"
+    },
+    {
+      "name": "link_url",
+      "label": "Link URL",
+      "type": "string",
+      "description": "Destination URL",
+      "sql": "${TABLE}.link_url"
+    }
+  ],
+
+  "dimension_groups": [
+    {
+      "name": "extracted_at",
+      "label": "Extracted",
+      "type": "time",
+      "description": "When the data was extracted",
+      "sql": "${TABLE}.extracted_at",
+      "timeframes": ["raw", "time", "datetime", "date", "week", "month", "quarter", "year"],
+      "datatype": "timestamp"
+    },
+    {
+      "name": "_ingestion_time",
+      "label": "Ingestion Time",
+      "type": "time",
+      "description": "When the data was ingested into BigQuery",
+      "sql": "${TABLE}._ingestion_time",
+      "timeframes": ["raw", "time", "datetime", "date", "week", "month", "quarter", "year"],
+      "datatype": "timestamp"
+    }
+  ],
+
+  "measures": [
+    {
+      "name": "impressions",
+      "label": "Impressions",
+      "type": "sum",
+      "description": "Total number of times ads were shown",
+      "sql": "${TABLE}.impressions",
+      "value_format": "#,##0"
+    },
+    {
+      "name": "clicks",
+      "label": "Clicks",
+      "type": "sum",
+      "description": "Total number of clicks",
+      "sql": "${TABLE}.clicks",
+      "value_format": "#,##0"
+    },
+    {
+      "name": "spend",
+      "label": "Spend",
+      "type": "sum",
+      "description": "Total amount spent",
+      "sql": "${TABLE}.spend",
+      "value_format": "$#,##0.00"
+    },
+    {
+      "name": "conversions",
+      "label": "Conversions",
+      "type": "sum",
+      "description": "Total number of conversions",
+      "sql": "${TABLE}.conversions",
+      "value_format": "#,##0"
+    },
+    {
+      "name": "conversions_value",
+      "label": "Conversions Value",
+      "type": "sum",
+      "description": "Total value of conversions",
+      "sql": "${TABLE}.conversions_value",
+      "value_format": "$#,##0.00"
+    },
+    {
+      "name": "count",
+      "label": "Creative Count",
+      "type": "count",
+      "description": "Number of unique creatives",
+      "sql": "1",
+      "value_format": "#,##0"
+    }
+  ],
+
+  "calculations": [
+    {
+      "name": "ctr",
+      "label": "CTR",
+      "type": "number",
+      "description": "Click-through rate (Clicks / Impressions)",
+      "sql": "SAFE_DIVIDE(${clicks}, ${impressions}) * 100",
+      "value_format": "#,##0.00'%'"
+    },
+    {
+      "name": "cpc",
+      "label": "CPC",
+      "type": "number",
+      "description": "Cost per click (Spend / Clicks)",
+      "sql": "SAFE_DIVIDE(${spend}, ${clicks})",
+      "value_format": "$#,##0.00"
+    },
+    {
+      "name": "cpm",
+      "label": "CPM",
+      "type": "number",
+      "description": "Cost per thousand impressions",
+      "sql": "SAFE_DIVIDE(${spend}, ${impressions}) * 1000",
+      "value_format": "$#,##0.00"
+    },
+    {
+      "name": "cost_per_conversion",
+      "label": "Cost per Conversion",
+      "type": "number",
+      "description": "Average cost per conversion",
+      "sql": "SAFE_DIVIDE(${spend}, ${conversions})",
+      "value_format": "$#,##0.00"
+    },
+    {
+      "name": "roas",
+      "label": "ROAS",
+      "type": "number",
+      "description": "Return on ad spend (Conversions Value / Spend)",
+      "sql": "SAFE_DIVIDE(${conversions_value}, ${spend})",
+      "value_format": "#,##0.00"
+    },
+    {
+      "name": "conversion_rate",
+      "label": "Conversion Rate",
+      "type": "number",
+      "description": "Percentage of clicks that converted",
+      "sql": "SAFE_DIVIDE(${conversions}, ${clicks}) * 100",
+      "value_format": "#,##0.00'%'"
+    },
+    {
+      "name": "is_video",
+      "label": "Is Video",
+      "type": "yesno",
+      "description": "Whether creative is a video",
+      "sql": "${object_type} = 'VIDEO' OR ${video_id} IS NOT NULL"
+    },
+    {
+      "name": "is_image",
+      "label": "Is Image",
+      "type": "yesno",
+      "description": "Whether creative is an image",
+      "sql": "${object_type} = 'IMAGE'"
+    },
+    {
+      "name": "has_cta",
+      "label": "Has CTA",
+      "type": "yesno",
+      "description": "Whether creative has a call-to-action button",
+      "sql": "${call_to_action_type} IS NOT NULL"
+    },
+    {
+      "name": "profit",
+      "label": "Profit",
+      "type": "number",
+      "description": "Conversions Value minus Spend",
+      "sql": "${conversions_value} - ${spend}",
+      "value_format": "$#,##0.00"
+    }
+  ],
+
+  "filters": [
+    {
+      "name": "campaign_filter",
+      "label": "Campaign",
+      "type": "string",
+      "field": "campaign_name",
+      "suggestions": true
+    },
+    {
+      "name": "adset_filter",
+      "label": "Ad Set",
+      "type": "string",
+      "field": "adset_name",
+      "suggestions": true
+    },
+    {
+      "name": "creative_type_filter",
+      "label": "Creative Type",
+      "type": "string",
+      "field": "object_type",
+      "allowed_values": ["IMAGE", "VIDEO", "CAROUSEL", "COLLECTION"]
+    },
+    {
+      "name": "cta_type_filter",
+      "label": "CTA Type",
+      "type": "string",
+      "field": "call_to_action_type",
+      "suggestions": true
+    },
+    {
+      "name": "min_spend",
+      "label": "Minimum Spend",
+      "type": "number",
+      "field": "spend",
+      "operator": ">="
+    },
+    {
+      "name": "min_impressions",
+      "label": "Minimum Impressions",
+      "type": "number",
+      "field": "impressions",
+      "operator": ">="
+    }
+  ]
+}

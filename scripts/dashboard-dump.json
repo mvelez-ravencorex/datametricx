@@ -1,0 +1,553 @@
+{
+  "KivT5Icpm3xjRJUGnxnr": {
+    "id": "KivT5Icpm3xjRJUGnxnr",
+    "tenantId": "0m24GMjHwY1XYGlTVYDb",
+    "name": "Creative Lab & Retention",
+    "description": "Entender por qué un anuncio funciona (o falla)",
+    "folderId": null,
+    "config": {
+      "layout": {
+        "columns": 12,
+        "rowHeight": 50,
+        "gap": 16,
+        "padding": 24
+      },
+      "theme": {
+        "backgroundColor": "#f9fafb",
+        "fontFamily": "Montserrat",
+        "primaryColor": "#3B82F6"
+      },
+      "globalFilters": [],
+      "elements": [],
+      "variables": []
+    },
+    "createdBy": "LyCBbtgicPXqK5hQ9GJvNUhdyTI3",
+    "updatedBy": "LyCBbtgicPXqK5hQ9GJvNUhdyTI3",
+    "isPublic": false,
+    "publicToken": null,
+    "createdAt": {
+      "_seconds": 1765683162,
+      "_nanoseconds": 340000000
+    },
+    "updatedAt": {
+      "_seconds": 1765683162,
+      "_nanoseconds": 340000000
+    }
+  },
+  "ZbRqrXSkGQ0ghjYFW2pS": {
+    "id": "ZbRqrXSkGQ0ghjYFW2pS",
+    "tenantId": "0m24GMjHwY1XYGlTVYDb",
+    "name": "Audience & Scale Insights",
+    "description": "Encontrar nuevos bolsillos de rentabilidad para escalar",
+    "folderId": null,
+    "config": {
+      "layout": {
+        "columns": 12,
+        "rowHeight": 50,
+        "gap": 16,
+        "padding": 24
+      },
+      "theme": {
+        "backgroundColor": "#f9fafb",
+        "fontFamily": "Montserrat",
+        "primaryColor": "#3B82F6"
+      },
+      "globalFilters": [],
+      "elements": [],
+      "variables": []
+    },
+    "createdBy": "LyCBbtgicPXqK5hQ9GJvNUhdyTI3",
+    "updatedBy": "LyCBbtgicPXqK5hQ9GJvNUhdyTI3",
+    "isPublic": false,
+    "publicToken": null,
+    "createdAt": {
+      "_seconds": 1765683188,
+      "_nanoseconds": 996000000
+    },
+    "updatedAt": {
+      "_seconds": 1765683188,
+      "_nanoseconds": 996000000
+    }
+  },
+  "muvgTXtbvadwODKUhIYF": {
+    "id": "muvgTXtbvadwODKUhIYF",
+    "tenantId": "0m24GMjHwY1XYGlTVYDb",
+    "name": "Executive Command Center",
+    "description": "Respuesta rápida a \"¿Ganamos dinero hoy?",
+    "folderId": null,
+    "createdBy": "LyCBbtgicPXqK5hQ9GJvNUhdyTI3",
+    "updatedBy": "LyCBbtgicPXqK5hQ9GJvNUhdyTI3",
+    "isPublic": false,
+    "publicToken": null,
+    "createdAt": {
+      "_seconds": 1765680811,
+      "_nanoseconds": 880000000
+    },
+    "config": {
+      "layout": {
+        "gap": 16,
+        "columns": 12,
+        "padding": 24,
+        "rowHeight": 50
+      },
+      "globalFilters": [],
+      "elements": [
+        {
+          "title": "Performance Campanas",
+          "embeddedConfig": {
+            "colorScheme": "default",
+            "orderBy": [],
+            "runtimeChartSettings": {
+              "yAxisFormatType": "auto",
+              "pieInnerRadius": 0,
+              "treatNullsAsZero": true,
+              "pointStyle": "filled",
+              "showYGridLines": true,
+              "showXGridLines": true,
+              "areaFillType": "solid",
+              "showDataLabels": false
+            },
+            "selectedAttributes": [],
+            "selectedMetrics": [
+              {
+                "entityId": "fact_meta_performance_campaign",
+                "label": "Inversion",
+                "fieldId": "spend"
+              }
+            ],
+            "chartSettings": {
+              "settings": {
+                "decimalSeparator": "dot",
+                "useThresholds": false,
+                "thresholds": [],
+                "color": "#000000",
+                "label": "Total Spend",
+                "labelBold": false,
+                "labelPosition": "below",
+                "decimalPlaces": 0,
+                "format": "auto"
+              },
+              "type": "single"
+            },
+            "xAxisFormat": {
+              "type": "auto"
+            },
+            "singleValueSettings": {
+              "label": "Total Spend",
+              "labelPosition": "below",
+              "color": "#000000",
+              "decimalSeparator": "dot",
+              "labelBold": false,
+              "format": "auto",
+              "decimalPlaces": 0
+            },
+            "datasetId": "ds_performance_campaign",
+            "seriesConfig": {},
+            "filters": [],
+            "chartRowLimit": 6,
+            "rowLimit": 500,
+            "vizType": "single"
+          },
+          "type": "visualization",
+          "showTitle": false,
+          "id": "oqgqqX2PRa",
+          "position": {
+            "x": 25,
+            "y": 25,
+            "width": 400,
+            "height": 150
+          }
+        },
+        {
+          "id": "rtBe-A7Hfg",
+          "embeddedConfig": {
+            "xAxisFormat": {
+              "type": "auto"
+            },
+            "seriesConfig": {},
+            "singleValueSettings": {
+              "labelBold": false,
+              "decimalPlaces": 0,
+              "format": "auto",
+              "label": "Total Profit Bruto",
+              "decimalSeparator": "dot",
+              "color": "#000000",
+              "labelPosition": "below"
+            },
+            "vizType": "single",
+            "selectedMetrics": [
+              {
+                "label": "Profit Bruto",
+                "fieldId": "gross_profit",
+                "entityId": "fact_meta_performance_campaign"
+              }
+            ],
+            "selectedAttributes": [],
+            "colorScheme": "default",
+            "filters": [],
+            "rowLimit": 500,
+            "orderBy": [],
+            "datasetId": "ds_performance_campaign",
+            "runtimeChartSettings": {
+              "showYGridLines": true,
+              "pieInnerRadius": 0,
+              "yAxisFormatType": "auto",
+              "showXGridLines": true,
+              "areaFillType": "solid",
+              "pointStyle": "filled",
+              "showDataLabels": false,
+              "treatNullsAsZero": true
+            },
+            "chartSettings": {
+              "settings": {
+                "color": "#000000",
+                "decimalPlaces": 0,
+                "useThresholds": false,
+                "thresholds": [],
+                "labelPosition": "below",
+                "labelBold": false,
+                "format": "auto",
+                "decimalSeparator": "dot",
+                "label": "Total Profit Bruto"
+              },
+              "type": "single"
+            },
+            "chartRowLimit": 6
+          },
+          "title": "Performance Campanas",
+          "showTitle": false,
+          "type": "visualization",
+          "position": {
+            "height": 150,
+            "width": 400,
+            "y": 25,
+            "x": 450
+          }
+        },
+        {
+          "embeddedConfig": {
+            "runtimeChartSettings": {
+              "pieInnerRadius": 0,
+              "areaFillType": "solid",
+              "pointStyle": "filled",
+              "yAxisFormatType": "auto",
+              "treatNullsAsZero": true,
+              "showDataLabels": false,
+              "showXGridLines": true,
+              "showYGridLines": true
+            },
+            "colorScheme": "default",
+            "xAxisFormat": {
+              "type": "auto"
+            },
+            "chartRowLimit": 6,
+            "filters": [],
+            "seriesConfig": {},
+            "datasetId": "ds_performance_campaign",
+            "selectedAttributes": [],
+            "rowLimit": 500,
+            "orderBy": [],
+            "chartSettings": {
+              "type": "single",
+              "settings": {
+                "labelBold": false,
+                "useThresholds": false,
+                "format": "auto",
+                "color": "#000000",
+                "labelPosition": "below",
+                "decimalSeparator": "dot",
+                "thresholds": [],
+                "label": "Roas / Blended Roas?",
+                "decimalPlaces": 0
+              }
+            },
+            "selectedMetrics": [
+              {
+                "fieldId": "roas",
+                "label": "ROAS",
+                "entityId": "fact_meta_performance_campaign"
+              }
+            ],
+            "singleValueSettings": {
+              "format": "auto",
+              "decimalPlaces": 0,
+              "labelPosition": "below",
+              "color": "#000000",
+              "label": "Roas / Blended Roas?",
+              "decimalSeparator": "dot",
+              "labelBold": false
+            },
+            "vizType": "single"
+          },
+          "type": "visualization",
+          "position": {
+            "y": 25,
+            "height": 150,
+            "width": 400,
+            "x": 875
+          },
+          "title": "Performance Campanas",
+          "showTitle": false,
+          "id": "FknkT02kEN"
+        },
+        {
+          "position": {
+            "width": 400,
+            "x": 1300,
+            "height": 150,
+            "y": 25
+          },
+          "id": "55BNf9wVvQ",
+          "embeddedConfig": {
+            "rowLimit": 500,
+            "chartRowLimit": 6,
+            "runtimeChartSettings": {
+              "showDataLabels": false,
+              "yAxisFormatType": "auto",
+              "treatNullsAsZero": true,
+              "pointStyle": "filled",
+              "areaFillType": "solid",
+              "pieInnerRadius": 0,
+              "showXGridLines": true,
+              "showYGridLines": true
+            },
+            "vizType": "single",
+            "orderBy": [],
+            "datasetId": "ds_performance_campaign",
+            "seriesConfig": {},
+            "selectedAttributes": [],
+            "filters": [],
+            "chartSettings": {
+              "type": "single",
+              "settings": {
+                "decimalSeparator": "dot",
+                "decimalPlaces": 0,
+                "labelBold": false,
+                "format": "auto",
+                "color": "#000000",
+                "useThresholds": false,
+                "thresholds": [],
+                "label": "",
+                "labelPosition": "below"
+              }
+            },
+            "selectedMetrics": [
+              {
+                "fieldId": "cost_per_purchase",
+                "entityId": "fact_meta_performance_campaign",
+                "label": "CPA"
+              }
+            ],
+            "xAxisFormat": {
+              "type": "auto"
+            },
+            "singleValueSettings": {
+              "labelPosition": "below",
+              "labelBold": false,
+              "format": "auto",
+              "color": "#000000",
+              "decimalPlaces": 0,
+              "label": "",
+              "decimalSeparator": "dot"
+            },
+            "colorScheme": "default"
+          },
+          "showTitle": false,
+          "type": "visualization",
+          "title": "Performance Campanas"
+        },
+        {
+          "title": "Tendencia de Rentabilidad",
+          "showTitle": true,
+          "type": "visualization",
+          "titleAlign": "center",
+          "embeddedConfig": {
+            "chartSettings": {
+              "type": "area",
+              "settings": {
+                "opacity": 0.6,
+                "showGrid": true,
+                "stacked": false,
+                "curved": true
+              }
+            },
+            "seriesConfig": {},
+            "colorScheme": "default",
+            "xAxisFormat": {
+              "type": "auto"
+            },
+            "selectedAttributes": [
+              {
+                "entityId": "fact_meta_performance_campaign",
+                "label": "Fecha (date)",
+                "fieldId": "date_date"
+              }
+            ],
+            "orderBy": [
+              {
+                "field": "date_date",
+                "direction": "ASC"
+              }
+            ],
+            "vizType": "area",
+            "datasetId": "ds_performance_campaign",
+            "filters": [],
+            "rowLimit": 500,
+            "selectedMetrics": [
+              {
+                "entityId": "fact_meta_performance_campaign",
+                "fieldId": "spend",
+                "label": "Inversion"
+              },
+              {
+                "entityId": "fact_meta_performance_campaign",
+                "label": "Profit Bruto",
+                "fieldId": "gross_profit"
+              }
+            ],
+            "runtimeChartSettings": {
+              "showYGridLines": true,
+              "yAxisFormatType": "auto",
+              "pieInnerRadius": 0,
+              "showDataLabels": false,
+              "showXGridLines": true,
+              "pointStyle": "filled",
+              "treatNullsAsZero": true,
+              "areaFillType": "solid"
+            },
+            "chartRowLimit": 6
+          },
+          "position": {
+            "height": 375,
+            "x": 25,
+            "width": 850,
+            "y": 225
+          },
+          "id": "FVu3kZxbov"
+        },
+        {
+          "label": "Fecha (date)",
+          "affectsElements": [
+            "oqgqqX2PRa",
+            "rtBe-A7Hfg",
+            "FknkT02kEN",
+            "55BNf9wVvQ"
+          ],
+          "type": "filter",
+          "fieldLabel": "Fecha (date)",
+          "displayType": "dropdown",
+          "datasetId": "ds_performance_campaign",
+          "position": {
+            "x": 0,
+            "width": 200,
+            "y": 175,
+            "height": 40
+          },
+          "id": "onbdfYV1HX",
+          "fieldId": "date_date",
+          "filterType": "daterange",
+          "timeframe": "date"
+        },
+        {
+          "id": "HHg_sCPg9g",
+          "position": {
+            "height": 375,
+            "width": 800,
+            "y": 225,
+            "x": 900
+          },
+          "type": "visualization",
+          "embeddedConfig": {
+            "datasetId": "ds_performance_campaign",
+            "selectedAttributes": [
+              {
+                "fieldId": "campaign_name",
+                "entityId": "fact_meta_performance_campaign",
+                "label": "Campana"
+              }
+            ],
+            "selectedMetrics": [
+              {
+                "fieldId": "spend",
+                "entityId": "fact_meta_performance_campaign",
+                "label": "Inversion"
+              },
+              {
+                "fieldId": "purchase_count",
+                "entityId": "fact_meta_performance_campaign",
+                "label": "Compras"
+              },
+              {
+                "fieldId": "cost_per_purchase",
+                "entityId": "fact_meta_performance_campaign",
+                "label": "CPA"
+              },
+              {
+                "fieldId": "roas",
+                "entityId": "fact_meta_performance_campaign",
+                "label": "ROAS"
+              }
+            ],
+            "filters": [],
+            "orderBy": [],
+            "rowLimit": 500,
+            "vizType": "table",
+            "chartSettings": {
+              "type": "line",
+              "settings": {
+                "showGrid": true,
+                "showDots": true,
+                "curved": true,
+                "fillArea": false
+              }
+            },
+            "colorScheme": "default",
+            "chartRowLimit": 6,
+            "seriesConfig": {
+              "roas": {
+                "thresholds": [
+                  {
+                    "min": -100,
+                    "max": 2,
+                    "color": "#ff2600"
+                  },
+                  {
+                    "min": 4,
+                    "max": 1000,
+                    "color": "#10B981"
+                  }
+                ]
+              }
+            },
+            "xAxisFormat": {
+              "type": "auto"
+            },
+            "runtimeChartSettings": {
+              "showDataLabels": false,
+              "showXGridLines": true,
+              "showYGridLines": true,
+              "pointStyle": "filled",
+              "pieInnerRadius": 0,
+              "yAxisFormatType": "auto",
+              "areaFillType": "solid",
+              "treatNullsAsZero": true
+            }
+          },
+          "title": "Performance Campanas",
+          "showTitle": true,
+          "titleAlign": "center"
+        }
+      ],
+      "theme": {
+        "fontFamily": "Montserrat",
+        "primaryColor": "#3B82F6",
+        "backgroundColor": "#f9fafb"
+      },
+      "variables": []
+    },
+    "updatedAt": {
+      "_seconds": 1765828421,
+      "_nanoseconds": 240000000
+    }
+  }
+}

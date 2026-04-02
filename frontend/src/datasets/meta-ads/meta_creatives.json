@@ -1,0 +1,253 @@
+{
+  "name": "meta_creatives",
+  "label": "Meta Ads Creatives",
+  "description": "Creative assets and their performance metrics",
+  "category": "advertising",
+  "source": {
+    "type": "bigquery",
+    "project": "datametricx-prod",
+    "dataset": "reporting",
+    "table": "meta_creatives"
+  },
+  "primary_key": ["creative_id"],
+
+  "dimensions": [
+    {
+      "name": "creative_id",
+      "label": "Creative ID",
+      "type": "string",
+      "description": "Unique identifier for the creative",
+      "sql": "${TABLE}.creative_id",
+      "primary_key": true
+    },
+    {
+      "name": "creative_name",
+      "label": "Creative Name",
+      "type": "string",
+      "description": "Name of the creative",
+      "sql": "${TABLE}.creative_name"
+    },
+    {
+      "name": "title",
+      "label": "Title",
+      "type": "string",
+      "description": "Creative title text",
+      "sql": "${TABLE}.title"
+    },
+    {
+      "name": "body",
+      "label": "Body",
+      "type": "string",
+      "description": "Creative body text",
+      "sql": "${TABLE}.body"
+    },
+    {
+      "name": "call_to_action_type",
+      "label": "CTA Type",
+      "type": "string",
+      "description": "Type of call to action button",
+      "sql": "${TABLE}.call_to_action_type"
+    },
+    {
+      "name": "image_url",
+      "label": "Image URL",
+      "type": "string",
+      "description": "URL of the creative image",
+      "sql": "${TABLE}.image_url"
+    },
+    {
+      "name": "image_hash",
+      "label": "Image Hash",
+      "type": "string",
+      "description": "Hash of the image file",
+      "sql": "${TABLE}.image_hash"
+    },
+    {
+      "name": "video_id",
+      "label": "Video ID",
+      "type": "string",
+      "description": "ID of the video if applicable",
+      "sql": "${TABLE}.video_id"
+    },
+    {
+      "name": "link_url",
+      "label": "Link URL",
+      "type": "string",
+      "description": "Destination URL",
+      "sql": "${TABLE}.link_url"
+    },
+    {
+      "name": "object_type",
+      "label": "Object Type",
+      "type": "string",
+      "description": "Type of creative (IMAGE, VIDEO, CAROUSEL, etc.)",
+      "sql": "${TABLE}.object_type"
+    },
+    {
+      "name": "thumbnail_url",
+      "label": "Thumbnail URL",
+      "type": "string",
+      "description": "Thumbnail image URL",
+      "sql": "${TABLE}.thumbnail_url"
+    }
+  ],
+
+  "dimension_groups": [
+    {
+      "name": "extracted_at",
+      "label": "Extracted",
+      "type": "time",
+      "description": "When the data was extracted",
+      "sql": "${TABLE}.extracted_at",
+      "timeframes": ["raw", "time", "datetime", "date", "week", "month", "quarter", "year"],
+      "datatype": "timestamp"
+    },
+    {
+      "name": "_ingestion_time",
+      "label": "Ingestion Time",
+      "type": "time",
+      "description": "When the data was ingested into BigQuery",
+      "sql": "${TABLE}._ingestion_time",
+      "timeframes": ["raw", "time", "datetime", "date", "week", "month", "quarter", "year"],
+      "datatype": "timestamp"
+    }
+  ],
+
+  "measures": [
+    {
+      "name": "impressions",
+      "label": "Impressions",
+      "type": "sum",
+      "description": "Total impressions for this creative",
+      "sql": "${TABLE}.impressions",
+      "value_format": "#,##0"
+    },
+    {
+      "name": "clicks",
+      "label": "Clicks",
+      "type": "sum",
+      "description": "Total clicks for this creative",
+      "sql": "${TABLE}.clicks",
+      "value_format": "#,##0"
+    },
+    {
+      "name": "spend",
+      "label": "Spend",
+      "type": "sum",
+      "description": "Total spend for this creative",
+      "sql": "${TABLE}.spend",
+      "value_format": "$#,##0.00"
+    },
+    {
+      "name": "conversions",
+      "label": "Conversions",
+      "type": "sum",
+      "description": "Total conversions for this creative",
+      "sql": "${TABLE}.conversions",
+      "value_format": "#,##0"
+    },
+    {
+      "name": "count",
+      "label": "Creative Count",
+      "type": "count",
+      "description": "Number of unique creatives",
+      "sql": "1",
+      "value_format": "#,##0"
+    }
+  ],
+
+  "calculations": [
+    {
+      "name": "ctr",
+      "label": "CTR",
+      "type": "number",
+      "description": "Click-through rate",
+      "sql": "SAFE_DIVIDE(${clicks}, ${impressions}) * 100",
+      "value_format": "#,##0.00'%'"
+    },
+    {
+      "name": "conversion_rate",
+      "label": "Conversion Rate",
+      "type": "number",
+      "description": "Percentage of clicks that converted",
+      "sql": "SAFE_DIVIDE(${conversions}, ${clicks}) * 100",
+      "value_format": "#,##0.00'%'"
+    },
+    {
+      "name": "cpc",
+      "label": "CPC",
+      "type": "number",
+      "description": "Cost per click",
+      "sql": "SAFE_DIVIDE(${spend}, ${clicks})",
+      "value_format": "$#,##0.00"
+    },
+    {
+      "name": "cpa",
+      "label": "CPA",
+      "type": "number",
+      "description": "Cost per acquisition",
+      "sql": "SAFE_DIVIDE(${spend}, ${conversions})",
+      "value_format": "$#,##0.00"
+    },
+    {
+      "name": "is_video",
+      "label": "Is Video",
+      "type": "yesno",
+      "description": "Whether creative is a video",
+      "sql": "${object_type} = 'VIDEO' OR ${video_id} IS NOT NULL"
+    },
+    {
+      "name": "is_image",
+      "label": "Is Image",
+      "type": "yesno",
+      "description": "Whether creative is an image",
+      "sql": "${object_type} = 'IMAGE'"
+    },
+    {
+      "name": "has_cta",
+      "label": "Has CTA",
+      "type": "yesno",
+      "description": "Whether creative has a call-to-action button",
+      "sql": "${call_to_action_type} IS NOT NULL"
+    },
+    {
+      "name": "title_length",
+      "label": "Title Length",
+      "type": "number",
+      "description": "Length of the title text",
+      "sql": "LENGTH(${TABLE}.title)",
+      "value_format": "#,##0"
+    },
+    {
+      "name": "body_length",
+      "label": "Body Length",
+      "type": "number",
+      "description": "Length of the body text",
+      "sql": "LENGTH(${TABLE}.body)",
+      "value_format": "#,##0"
+    }
+  ],
+
+  "filters": [
+    {
+      "name": "object_type_filter",
+      "label": "Creative Type",
+      "type": "string",
+      "field": "object_type",
+      "allowed_values": ["IMAGE", "VIDEO", "CAROUSEL", "COLLECTION"]
+    },
+    {
+      "name": "cta_type_filter",
+      "label": "CTA Type",
+      "type": "string",
+      "field": "call_to_action_type"
+    },
+    {
+      "name": "min_impressions",
+      "label": "Minimum Impressions",
+      "type": "number",
+      "field": "impressions",
+      "operator": ">="
+    }
+  ]
+}

@@ -1,0 +1,217 @@
+{
+  "name": "meta_adsets",
+  "label": "Meta Ads Ad Sets",
+  "description": "Ad Set level metadata and budget configuration",
+  "category": "advertising",
+  "source": {
+    "type": "bigquery",
+    "project": "datametricx-prod",
+    "dataset": "reporting",
+    "table": "meta_adsets"
+  },
+  "primary_key": ["adset_id"],
+
+  "dimensions": [
+    {
+      "name": "adset_id",
+      "label": "Ad Set ID",
+      "type": "string",
+      "description": "Unique identifier for the ad set",
+      "sql": "${TABLE}.adset_id",
+      "primary_key": true
+    },
+    {
+      "name": "name",
+      "label": "Ad Set Name",
+      "type": "string",
+      "description": "Name of the ad set",
+      "sql": "${TABLE}.name"
+    },
+    {
+      "name": "account_id",
+      "label": "Account ID",
+      "type": "string",
+      "description": "Meta Ads account ID",
+      "sql": "${TABLE}.account_id"
+    },
+    {
+      "name": "campaign_id",
+      "label": "Campaign ID",
+      "type": "string",
+      "description": "Parent campaign ID",
+      "sql": "${TABLE}.campaign_id"
+    },
+    {
+      "name": "status",
+      "label": "Status",
+      "type": "string",
+      "description": "Current status of the ad set",
+      "sql": "${TABLE}.status"
+    },
+    {
+      "name": "effective_status",
+      "label": "Effective Status",
+      "type": "string",
+      "description": "Effective status considering parent entities",
+      "sql": "${TABLE}.effective_status"
+    },
+    {
+      "name": "optimization_goal",
+      "label": "Optimization Goal",
+      "type": "string",
+      "description": "What the ad set is optimized for",
+      "sql": "${TABLE}.optimization_goal"
+    },
+    {
+      "name": "bid_strategy",
+      "label": "Bid Strategy",
+      "type": "string",
+      "description": "Bidding strategy (LOWEST_COST_WITH_BID_CAP, etc.)",
+      "sql": "${TABLE}.bid_strategy"
+    }
+  ],
+
+  "dimension_groups": [
+    {
+      "name": "created_time",
+      "label": "Created",
+      "type": "time",
+      "description": "When the ad set was created",
+      "sql": "${TABLE}.created_time",
+      "timeframes": ["raw", "time", "datetime", "date", "week", "month", "quarter", "year"],
+      "datatype": "timestamp"
+    },
+    {
+      "name": "updated_time",
+      "label": "Updated",
+      "type": "time",
+      "description": "When the ad set was last updated",
+      "sql": "${TABLE}.updated_time",
+      "timeframes": ["raw", "time", "datetime", "date", "week", "month", "quarter", "year"],
+      "datatype": "timestamp"
+    },
+    {
+      "name": "start_time",
+      "label": "Start",
+      "type": "time",
+      "description": "Ad set start date",
+      "sql": "${TABLE}.start_time",
+      "timeframes": ["raw", "time", "datetime", "date", "week", "month", "quarter", "year"],
+      "datatype": "timestamp"
+    },
+    {
+      "name": "end_time",
+      "label": "End",
+      "type": "time",
+      "description": "Ad set end date",
+      "sql": "${TABLE}.end_time",
+      "timeframes": ["raw", "time", "datetime", "date", "week", "month", "quarter", "year"],
+      "datatype": "timestamp"
+    },
+    {
+      "name": "extracted_at",
+      "label": "Extracted",
+      "type": "time",
+      "description": "When the data was extracted",
+      "sql": "${TABLE}.extracted_at",
+      "timeframes": ["raw", "time", "datetime", "date", "week", "month", "quarter", "year"],
+      "datatype": "timestamp"
+    },
+    {
+      "name": "_ingestion_time",
+      "label": "Ingestion Time",
+      "type": "time",
+      "description": "When the data was ingested into BigQuery",
+      "sql": "${TABLE}._ingestion_time",
+      "timeframes": ["raw", "time", "datetime", "date", "week", "month", "quarter", "year"],
+      "datatype": "timestamp"
+    }
+  ],
+
+  "measures": [
+    {
+      "name": "daily_budget",
+      "label": "Daily Budget",
+      "type": "sum",
+      "description": "Total daily budget across ad sets",
+      "sql": "${TABLE}.daily_budget",
+      "value_format": "$#,##0.00"
+    },
+    {
+      "name": "lifetime_budget",
+      "label": "Lifetime Budget",
+      "type": "sum",
+      "description": "Total lifetime budget across ad sets",
+      "sql": "${TABLE}.lifetime_budget",
+      "value_format": "$#,##0.00"
+    },
+    {
+      "name": "count",
+      "label": "Ad Set Count",
+      "type": "count",
+      "description": "Number of ad sets",
+      "sql": "1",
+      "value_format": "#,##0"
+    },
+    {
+      "name": "avg_daily_budget",
+      "label": "Avg Daily Budget",
+      "type": "average",
+      "description": "Average daily budget per ad set",
+      "sql": "${TABLE}.daily_budget",
+      "value_format": "$#,##0.00"
+    }
+  ],
+
+  "calculations": [
+    {
+      "name": "is_active",
+      "label": "Is Active",
+      "type": "yesno",
+      "description": "Whether ad set is currently active",
+      "sql": "${status} = 'ACTIVE'"
+    },
+    {
+      "name": "is_effectively_active",
+      "label": "Is Effectively Active",
+      "type": "yesno",
+      "description": "Whether ad set is effectively running",
+      "sql": "${effective_status} = 'ACTIVE'"
+    },
+    {
+      "name": "budget_type",
+      "label": "Budget Type",
+      "type": "string",
+      "description": "Daily or Lifetime budget",
+      "sql": "CASE WHEN ${TABLE}.daily_budget IS NOT NULL THEN 'Daily' WHEN ${TABLE}.lifetime_budget IS NOT NULL THEN 'Lifetime' ELSE 'None' END"
+    }
+  ],
+
+  "filters": [
+    {
+      "name": "status_filter",
+      "label": "Status",
+      "type": "string",
+      "field": "status",
+      "allowed_values": ["ACTIVE", "PAUSED", "ARCHIVED", "DELETED"]
+    },
+    {
+      "name": "effective_status_filter",
+      "label": "Effective Status",
+      "type": "string",
+      "field": "effective_status"
+    },
+    {
+      "name": "optimization_goal_filter",
+      "label": "Optimization Goal",
+      "type": "string",
+      "field": "optimization_goal"
+    },
+    {
+      "name": "campaign_filter",
+      "label": "Campaign ID",
+      "type": "string",
+      "field": "campaign_id"
+    }
+  ]
+}

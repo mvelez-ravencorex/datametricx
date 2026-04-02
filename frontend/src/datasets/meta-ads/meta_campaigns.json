@@ -1,0 +1,220 @@
+{
+  "name": "meta_campaigns",
+  "label": "Meta Ads Campaigns",
+  "description": "Campaign level metadata and configuration",
+  "category": "advertising",
+  "source": {
+    "type": "bigquery",
+    "project": "datametricx-prod",
+    "dataset": "reporting",
+    "table": "meta_campaigns"
+  },
+  "primary_key": ["campaign_id"],
+
+  "dimensions": [
+    {
+      "name": "tenant_id",
+      "label": "Tenant ID",
+      "type": "string",
+      "description": "Tenant identifier",
+      "sql": "${TABLE}.tenant_id"
+    },
+    {
+      "name": "account_id",
+      "label": "Account ID",
+      "type": "string",
+      "description": "Meta Ads account identifier",
+      "sql": "${TABLE}.account_id"
+    },
+    {
+      "name": "campaign_id",
+      "label": "Campaign ID",
+      "type": "string",
+      "description": "Unique identifier for the campaign",
+      "sql": "${TABLE}.campaign_id",
+      "primary_key": true
+    },
+    {
+      "name": "name",
+      "label": "Campaign Name",
+      "type": "string",
+      "description": "Name of the campaign",
+      "sql": "${TABLE}.name"
+    },
+    {
+      "name": "status",
+      "label": "Status",
+      "type": "string",
+      "description": "Current status of the campaign",
+      "sql": "${TABLE}.status"
+    },
+    {
+      "name": "effective_status",
+      "label": "Effective Status",
+      "type": "string",
+      "description": "Effective status considering parent entities",
+      "sql": "${TABLE}.effective_status"
+    },
+    {
+      "name": "objective",
+      "label": "Objective",
+      "type": "string",
+      "description": "Marketing objective (CONVERSIONS, TRAFFIC, etc.)",
+      "sql": "${TABLE}.objective"
+    },
+    {
+      "name": "buying_type",
+      "label": "Buying Type",
+      "type": "string",
+      "description": "Auction or reserved buying type",
+      "sql": "${TABLE}.buying_type"
+    }
+  ],
+
+  "dimension_groups": [
+    {
+      "name": "created_time",
+      "label": "Created",
+      "type": "time",
+      "description": "When the campaign was created",
+      "sql": "${TABLE}.created_time",
+      "timeframes": ["raw", "time", "datetime", "date", "week", "month", "quarter", "year"],
+      "datatype": "timestamp"
+    },
+    {
+      "name": "updated_time",
+      "label": "Updated",
+      "type": "time",
+      "description": "When the campaign was last updated",
+      "sql": "${TABLE}.updated_time",
+      "timeframes": ["raw", "time", "datetime", "date", "week", "month", "quarter", "year"],
+      "datatype": "timestamp"
+    },
+    {
+      "name": "start_time",
+      "label": "Start",
+      "type": "time",
+      "description": "Campaign start date",
+      "sql": "${TABLE}.start_time",
+      "timeframes": ["raw", "time", "datetime", "date", "week", "month", "quarter", "year"],
+      "datatype": "timestamp"
+    },
+    {
+      "name": "stop_time",
+      "label": "Stop",
+      "type": "time",
+      "description": "Campaign end date",
+      "sql": "${TABLE}.stop_time",
+      "timeframes": ["raw", "time", "datetime", "date", "week", "month", "quarter", "year"],
+      "datatype": "timestamp"
+    },
+    {
+      "name": "extracted_at",
+      "label": "Extracted",
+      "type": "time",
+      "description": "When the data was extracted",
+      "sql": "${TABLE}.extracted_at",
+      "timeframes": ["raw", "time", "datetime", "date", "week", "month", "quarter", "year"],
+      "datatype": "timestamp"
+    },
+    {
+      "name": "_ingestion_time",
+      "label": "Ingestion Time",
+      "type": "time",
+      "description": "When the data was ingested into BigQuery",
+      "sql": "${TABLE}._ingestion_time",
+      "timeframes": ["raw", "time", "datetime", "date", "week", "month", "quarter", "year"],
+      "datatype": "timestamp"
+    }
+  ],
+
+  "measures": [
+    {
+      "name": "daily_budget",
+      "label": "Daily Budget",
+      "type": "sum",
+      "description": "Total daily budget across campaigns",
+      "sql": "${TABLE}.daily_budget",
+      "value_format": "$#,##0.00"
+    },
+    {
+      "name": "lifetime_budget",
+      "label": "Lifetime Budget",
+      "type": "sum",
+      "description": "Total lifetime budget across campaigns",
+      "sql": "${TABLE}.lifetime_budget",
+      "value_format": "$#,##0.00"
+    },
+    {
+      "name": "budget_remaining",
+      "label": "Budget Remaining",
+      "type": "sum",
+      "description": "Remaining budget across campaigns",
+      "sql": "${TABLE}.budget_remaining",
+      "value_format": "$#,##0.00"
+    },
+    {
+      "name": "count",
+      "label": "Campaign Count",
+      "type": "count",
+      "description": "Number of campaigns",
+      "sql": "1",
+      "value_format": "#,##0"
+    },
+    {
+      "name": "avg_daily_budget",
+      "label": "Avg Daily Budget",
+      "type": "average",
+      "description": "Average daily budget per campaign",
+      "sql": "${TABLE}.daily_budget",
+      "value_format": "$#,##0.00"
+    }
+  ],
+
+  "calculations": [
+    {
+      "name": "is_active",
+      "label": "Is Active",
+      "type": "yesno",
+      "description": "Whether campaign is currently active",
+      "sql": "${status} = 'ACTIVE'"
+    },
+    {
+      "name": "budget_type",
+      "label": "Budget Type",
+      "type": "string",
+      "description": "Daily or Lifetime budget",
+      "sql": "CASE WHEN ${TABLE}.daily_budget IS NOT NULL THEN 'Daily' WHEN ${TABLE}.lifetime_budget IS NOT NULL THEN 'Lifetime' ELSE 'None' END"
+    },
+    {
+      "name": "days_running",
+      "label": "Days Running",
+      "type": "number",
+      "description": "Number of days campaign has been running",
+      "sql": "DATE_DIFF(CURRENT_DATE(), DATE(${TABLE}.start_time), DAY)",
+      "value_format": "#,##0"
+    }
+  ],
+
+  "filters": [
+    {
+      "name": "status_filter",
+      "label": "Status",
+      "type": "string",
+      "field": "status",
+      "allowed_values": ["ACTIVE", "PAUSED", "ARCHIVED", "DELETED"]
+    },
+    {
+      "name": "objective_filter",
+      "label": "Objective",
+      "type": "string",
+      "field": "objective"
+    },
+    {
+      "name": "created_date_range",
+      "label": "Created Date Range",
+      "type": "date",
+      "field": "created_time"
+    }
+  ]
+}

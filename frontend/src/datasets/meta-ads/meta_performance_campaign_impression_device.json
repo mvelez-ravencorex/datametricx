@@ -1,0 +1,230 @@
+{
+  "name": "meta_performance_campaign_impression_device",
+  "label": "Campaign Impression Device Performance",
+  "description": "Campaign performance metrics broken down by impression device",
+  "category": "advertising",
+  "source": {
+    "type": "bigquery",
+    "project": "datametricx-prod",
+    "dataset": "reporting",
+    "table": "meta_performance_campaign_impression_device"
+  },
+  "primary_key": ["date", "campaign_id", "impression_device"],
+
+  "dimensions": [
+    {
+      "name": "tenant_id",
+      "label": "Tenant ID",
+      "type": "string",
+      "description": "Tenant identifier",
+      "sql": "${TABLE}.tenant_id",
+      "hidden": true
+    },
+    {
+      "name": "account_id",
+      "label": "Account ID",
+      "type": "string",
+      "description": "Meta Ads account identifier",
+      "sql": "${TABLE}.account_id"
+    },
+    {
+      "name": "campaign_id",
+      "label": "Campaign ID",
+      "type": "string",
+      "description": "Unique identifier for the campaign",
+      "sql": "${TABLE}.campaign_id"
+    },
+    {
+      "name": "campaign_name",
+      "label": "Campaign Name",
+      "type": "string",
+      "description": "Name of the campaign",
+      "sql": "${TABLE}.campaign_name"
+    },
+    {
+      "name": "impression_device",
+      "label": "Impression Device",
+      "type": "string",
+      "description": "Device type where ad was shown (desktop, mobile_app, mobile_web)",
+      "sql": "${TABLE}.impression_device"
+    }
+  ],
+
+  "dimension_groups": [
+    {
+      "name": "date",
+      "label": "Date",
+      "type": "time",
+      "description": "Date of the metrics",
+      "sql": "${TABLE}.date",
+      "timeframes": ["raw", "time", "datetime", "date", "week", "month", "quarter", "year"],
+      "datatype": "date"
+    },
+    {
+      "name": "extracted_at",
+      "label": "Extracted",
+      "type": "time",
+      "description": "When the data was extracted",
+      "sql": "${TABLE}.extracted_at",
+      "timeframes": ["raw", "time", "datetime", "date", "week", "month", "quarter", "year"],
+      "datatype": "timestamp"
+    },
+    {
+      "name": "_ingestion_time",
+      "label": "Ingestion Time",
+      "type": "time",
+      "description": "When the data was ingested into BigQuery",
+      "sql": "${TABLE}._ingestion_time",
+      "timeframes": ["raw", "time", "datetime", "date", "week", "month", "quarter", "year"],
+      "datatype": "timestamp"
+    }
+  ],
+
+  "measures": [
+    {
+      "name": "impressions",
+      "label": "Impressions",
+      "type": "sum",
+      "description": "Total number of times ads were shown",
+      "sql": "${TABLE}.impressions",
+      "value_format": "#,##0"
+    },
+    {
+      "name": "clicks",
+      "label": "Clicks",
+      "type": "sum",
+      "description": "Total number of clicks",
+      "sql": "${TABLE}.clicks",
+      "value_format": "#,##0"
+    },
+    {
+      "name": "spend",
+      "label": "Spend",
+      "type": "sum",
+      "description": "Total amount spent",
+      "sql": "${TABLE}.spend",
+      "value_format": "$#,##0.00"
+    },
+    {
+      "name": "reach",
+      "label": "Reach",
+      "type": "sum",
+      "description": "Number of unique people who saw ads",
+      "sql": "${TABLE}.reach",
+      "value_format": "#,##0"
+    },
+    {
+      "name": "actions",
+      "label": "Actions",
+      "type": "sum",
+      "description": "Total number of actions taken",
+      "sql": "${TABLE}.actions",
+      "value_format": "#,##0"
+    },
+    {
+      "name": "conversions",
+      "label": "Conversions",
+      "type": "sum",
+      "description": "Total number of conversions",
+      "sql": "${TABLE}.conversions",
+      "value_format": "#,##0"
+    },
+    {
+      "name": "conversions_value",
+      "label": "Conversions Value",
+      "type": "sum",
+      "description": "Total value of conversions",
+      "sql": "${TABLE}.conversions_value",
+      "value_format": "$#,##0.00"
+    },
+    {
+      "name": "count",
+      "label": "Record Count",
+      "type": "count",
+      "description": "Number of records",
+      "sql": "1",
+      "value_format": "#,##0"
+    }
+  ],
+
+  "calculations": [
+    {
+      "name": "ctr",
+      "label": "CTR",
+      "type": "number",
+      "description": "Click-through rate (Clicks / Impressions)",
+      "sql": "SAFE_DIVIDE(${clicks}, ${impressions}) * 100",
+      "value_format": "#,##0.00'%'"
+    },
+    {
+      "name": "cpc",
+      "label": "CPC",
+      "type": "number",
+      "description": "Cost per click (Spend / Clicks)",
+      "sql": "SAFE_DIVIDE(${spend}, ${clicks})",
+      "value_format": "$#,##0.00"
+    },
+    {
+      "name": "cpm",
+      "label": "CPM",
+      "type": "number",
+      "description": "Cost per thousand impressions",
+      "sql": "SAFE_DIVIDE(${spend}, ${impressions}) * 1000",
+      "value_format": "$#,##0.00"
+    },
+    {
+      "name": "cost_per_conversion",
+      "label": "Cost per Conversion",
+      "type": "number",
+      "description": "Average cost per conversion",
+      "sql": "SAFE_DIVIDE(${spend}, ${conversions})",
+      "value_format": "$#,##0.00"
+    },
+    {
+      "name": "roas",
+      "label": "ROAS",
+      "type": "number",
+      "description": "Return on ad spend (Conversions Value / Spend)",
+      "sql": "SAFE_DIVIDE(${conversions_value}, ${spend})",
+      "value_format": "#,##0.00"
+    },
+    {
+      "name": "conversion_rate",
+      "label": "Conversion Rate",
+      "type": "number",
+      "description": "Percentage of clicks that converted",
+      "sql": "SAFE_DIVIDE(${conversions}, ${clicks}) * 100",
+      "value_format": "#,##0.00'%'"
+    }
+  ],
+
+  "filters": [
+    {
+      "name": "date_range",
+      "label": "Date Range",
+      "type": "date",
+      "field": "date"
+    },
+    {
+      "name": "campaign_filter",
+      "label": "Campaign",
+      "type": "string",
+      "field": "campaign_name",
+      "suggestions": true
+    },
+    {
+      "name": "device_filter",
+      "label": "Impression Device",
+      "type": "string",
+      "field": "impression_device",
+      "allowed_values": ["desktop", "mobile_app", "mobile_web"]
+    },
+    {
+      "name": "min_spend",
+      "label": "Minimum Spend",
+      "type": "number",
+      "field": "spend",
+      "operator": ">="
+    }
+  ]
+}

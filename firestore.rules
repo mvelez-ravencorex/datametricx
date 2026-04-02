@@ -1,0 +1,425 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===== SECURITY PRINCIPLES =====
+    // 1. NUNCA subestimar permisos - la seguridad es la prioridad #1
+    // 2. Cada tenant solo accede a SUS datos
+    // 3. Los Core Dashboards son PLANTILLAS almacenadas en colección separada
+    // 4. La ejecución de dashboards siempre usa datos del tenant del usuario
+    // 5. Principio de mínimo privilegio en todas las reglas
+
+    // ===== HELPER FUNCTIONS =====
+
+    /**
+     * Verifica si el usuario está autenticado
+     */
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    /**
+     * Verifica si el usuario es el propietario del recurso
+     */
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    /**
+     * Verifica si el usuario es admin del sistema
+     */
+    function isAdmin() {
+      return isAuthenticated() &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    /**
+     * Verifica si el usuario es miembro del tenant
+     */
+    function isTenantMember(tenantId) {
+      return isAuthenticated() &&
+             exists(/databases/$(database)/documents/tenants/$(tenantId)/members/$(request.auth.uid));
+    }
+
+    /**
+     * Obtiene el rol del usuario en el tenant
+     */
+    function getTenantRole(tenantId) {
+      return get(/databases/$(database)/documents/tenants/$(tenantId)/members/$(request.auth.uid)).data.role;
+    }
+
+    /**
+     * Verifica si el usuario es owner del tenant
+     */
+    function isTenantOwner(tenantId) {
+      return isTenantMember(tenantId) && getTenantRole(tenantId) == 'owner';
+    }
+
+    /**
+     * Verifica si el usuario es owner o admin del tenant
+     */
+    function isTenantAdmin(tenantId) {
+      return isTenantMember(tenantId) && getTenantRole(tenantId) in ['owner', 'admin'];
+    }
+
+    /**
+     * Verifica que los datos tengan los campos requeridos
+     */
+    function hasRequiredFields() {
+      return request.resource.data.keys().hasAll(['userId', 'createdAt', 'updatedAt']);
+    }
+
+    /**
+     * Verifica que no se intente modificar campos protegidos
+     */
+    function notModifyingProtectedFields(fields) {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(fields);
+    }
+
+    /**
+     * Verifica límite de tamaño de string
+     */
+    function stringSize(str, max) {
+      return str is string && str.size() <= max;
+    }
+
+    /**
+     * Verifica que el timestamp sea válido
+     */
+    function validTimestamp() {
+      return request.resource.data.createdAt is timestamp &&
+             request.resource.data.updatedAt is timestamp;
+    }
+
+    // ===== SYSTEM PERMISSIONS COLLECTION (Read-only for authenticated users) =====
+
+    match /system_permissions/{permissionId} {
+      // Cualquier usuario autenticado puede leer permisos del sistema
+      allow read: if isAuthenticated();
+
+      // Solo backend/admin puede escribir (via Admin SDK)
+      allow write: if false;
+    }
+
+    // ===== ROLES COLLECTION (Read-only for authenticated users) =====
+
+    match /roles/{roleId} {
+      // Cualquier usuario autenticado puede leer roles del sistema
+      allow read: if isAuthenticated();
+
+      // Solo backend/admin puede escribir (via Admin SDK)
+      allow write: if false;
+    }
+
+    // ===== USERS COLLECTION =====
+
+    match /users/{userId} {
+      // Cualquier usuario autenticado puede leer perfiles
+      allow read: if isAuthenticated();
+
+      // Solo el usuario puede crear su propio perfil
+      allow create: if isAuthenticated() &&
+                      request.auth.uid == userId &&
+                      request.resource.data.uid == userId;
+
+      // Solo el usuario o un admin puede actualizar
+      allow update: if isOwner(userId) || isAdmin();
+
+      // Prevenir escalación de privilegios
+      // Solo admins pueden cambiar roles
+      allow update: if isAdmin() || notModifyingProtectedFields(['role']);
+
+      // Solo admins pueden eliminar usuarios
+      allow delete: if isAdmin();
+    }
+
+    // ===== TENANTS COLLECTION (Multi-tenant Architecture) =====
+
+    match /tenants/{tenantId} {
+      // Solo miembros del tenant pueden leer sus datos
+      allow read: if isTenantMember(tenantId);
+
+      // Permitir crear tenant durante onboarding
+      allow create: if isAuthenticated() &&
+                      request.resource.data.owner_uid == request.auth.uid;
+
+      // Solo el owner puede actualizar plan y billing
+      allow update: if isTenantOwner(tenantId);
+
+      // Solo el owner puede eliminar el tenant
+      allow delete: if isTenantOwner(tenantId);
+
+      // Subcolección: members
+      match /members/{userId} {
+        // Solo miembros pueden ver la lista de members
+        allow read: if isTenantMember(tenantId);
+
+        // Permitir crear el primer member (owner) durante onboarding
+        // O si ya eres admin del tenant
+        allow create: if (isAuthenticated() &&
+                         request.auth.uid == userId &&
+                         request.resource.data.role == 'owner') ||
+                        isTenantAdmin(tenantId);
+
+        // Solo admins pueden actualizar roles (excepto owner)
+        allow update: if isTenantAdmin(tenantId) &&
+                        resource.data.role != 'owner';
+
+        // Solo owner puede eliminar members
+        allow delete: if isTenantOwner(tenantId) &&
+                        resource.data.role != 'owner';
+      }
+
+      // Subcolección: datasources
+      match /datasources/{datasourceId} {
+        // Solo miembros pueden leer datasources
+        allow read: if isTenantMember(tenantId);
+
+        // Solo admins pueden crear datasources
+        // Validar que el tenantId del documento coincida con el de la ruta
+        allow create: if isTenantAdmin(tenantId) &&
+                        request.resource.data.tenantId == tenantId;
+
+        // Solo admins pueden actualizar datasources
+        // No permitir cambiar el tenantId
+        allow update: if isTenantAdmin(tenantId) &&
+                        (!request.resource.data.keys().hasAny(['tenantId']) ||
+                         request.resource.data.tenantId == resource.data.tenantId);
+
+        // Solo owner puede eliminar datasources
+        allow delete: if isTenantOwner(tenantId);
+      }
+
+      // Subcolección: dashboards (dashboards propios del tenant)
+      match /dashboards/{dashboardId} {
+        // Solo miembros pueden leer dashboards de su tenant
+        allow read: if isTenantMember(tenantId);
+
+        // Cualquier miembro del tenant puede crear dashboards
+        allow create: if isTenantMember(tenantId);
+
+        // Cualquier miembro del tenant puede actualizar dashboards
+        allow update: if isTenantMember(tenantId);
+
+        // Cualquier miembro del tenant puede eliminar dashboards
+        allow delete: if isTenantMember(tenantId);
+      }
+
+      // Subcolección: dashboard_folders (Carpetas para dashboards)
+      match /dashboard_folders/{folderId} {
+        // Solo miembros pueden leer folders
+        allow read: if isTenantMember(tenantId);
+
+        // Cualquier miembro del tenant puede crear folders
+        allow create: if isTenantMember(tenantId);
+
+        // Cualquier miembro del tenant puede actualizar folders
+        allow update: if isTenantMember(tenantId);
+
+        // Cualquier miembro del tenant puede eliminar folders
+        allow delete: if isTenantMember(tenantId);
+      }
+
+      // Subcolección: visualizations
+      match /visualizations/{visualizationId} {
+        // Solo miembros pueden leer
+        allow read: if isTenantMember(tenantId);
+
+        // Analysts+ pueden crear/actualizar/eliminar
+        allow create, update, delete: if isTenantMember(tenantId) &&
+                                          getTenantRole(tenantId) in ['owner', 'admin', 'analyst'];
+      }
+
+      // Subcolección: settings
+      match /settings/{settingId} {
+        // Solo miembros pueden leer settings
+        allow read: if isTenantMember(tenantId);
+
+        // Solo admins pueden actualizar settings
+        allow write: if isTenantAdmin(tenantId);
+      }
+
+      // Subcolección: vizs (Visualizaciones guardadas del tenant)
+      match /vizs/{vizId} {
+        // Solo miembros pueden leer vizs de su tenant
+        allow read: if isTenantMember(tenantId);
+
+        // Cualquier miembro del tenant puede crear vizs
+        allow create: if isTenantMember(tenantId);
+
+        // Cualquier miembro del tenant puede actualizar vizs
+        allow update: if isTenantMember(tenantId);
+
+        // Cualquier miembro del tenant puede eliminar vizs
+        allow delete: if isTenantMember(tenantId);
+      }
+
+      // Subcolección: viz_folders (Carpetas para visualizaciones)
+      match /viz_folders/{folderId} {
+        // Solo miembros pueden leer folders
+        allow read: if isTenantMember(tenantId);
+
+        // Cualquier miembro del tenant puede crear folders
+        allow create: if isTenantMember(tenantId);
+
+        // Cualquier miembro del tenant puede actualizar folders
+        allow update: if isTenantMember(tenantId);
+
+        // Cualquier miembro del tenant puede eliminar folders
+        allow delete: if isTenantMember(tenantId);
+      }
+    }
+
+    // ===== CORE DASHBOARDS (Plantillas de DataMetricX) =====
+    // Colección a nivel raíz para dashboards del sistema
+    // Estos son PLANTILLAS - no contienen datos, solo configuración
+    // La ejecución siempre usa datos del tenant del usuario
+
+    match /core_dashboards/{dashboardId} {
+      // Cualquier usuario autenticado puede LEER las plantillas
+      allow read: if isAuthenticated();
+
+      // Solo SysOwner (via Admin SDK o custom claims) puede escribir
+      // Por ahora bloqueamos escritura desde cliente
+      allow write: if false;
+    }
+
+    match /core_dashboard_folders/{folderId} {
+      // Cualquier usuario autenticado puede LEER las carpetas de plantillas
+      allow read: if isAuthenticated();
+
+      // Solo SysOwner puede escribir (via Admin SDK)
+      allow write: if false;
+    }
+
+    // ===== CONNECTIONS COLLECTION (Legacy - mantener por compatibilidad) =====
+
+    match /connections/{connectionId} {
+      // Solo el propietario puede leer sus conexiones
+      allow read: if isAuthenticated() &&
+                    resource.data.userId == request.auth.uid;
+
+      // Solo el propietario puede crear conexiones
+      allow create: if isAuthenticated() &&
+                      request.resource.data.userId == request.auth.uid &&
+                      request.resource.data.platform in ['meta-ads', 'google-analytics-4', 'shopify', 'tiendanube', 'mercadolibre', 'tiktok'];
+
+      // Solo el propietario puede actualizar sus conexiones
+      allow update: if isAuthenticated() &&
+                      resource.data.userId == request.auth.uid &&
+                      request.resource.data.userId == resource.data.userId; // No cambiar userId
+
+      // Solo el propietario puede eliminar sus conexiones
+      allow delete: if isAuthenticated() &&
+                      resource.data.userId == request.auth.uid;
+    }
+
+    // ===== DATA SOURCES COLLECTION =====
+
+    match /dataSources/{sourceId} {
+      // Solo el propietario puede leer sus fuentes
+      allow read: if isAuthenticated() &&
+                    resource.data.userId == request.auth.uid;
+
+      // Solo usuarios autenticados pueden crear fuentes
+      allow create: if isAuthenticated() &&
+                      request.resource.data.userId == request.auth.uid &&
+                      hasRequiredFields() &&
+                      validTimestamp() &&
+                      stringSize(request.resource.data.name, 100) &&
+                      request.resource.data.type in ['facebook', 'google', 'shopify', 'tiktok', 'other'];
+
+      // Solo el propietario puede actualizar
+      allow update: if isAuthenticated() &&
+                      resource.data.userId == request.auth.uid &&
+                      request.resource.data.userId == resource.data.userId; // No cambiar userId
+
+      // Solo el propietario o admin puede eliminar
+      allow delete: if isOwner(resource.data.userId) || isAdmin();
+    }
+
+    // ===== METRICS COLLECTION =====
+
+    match /metrics/{metricId} {
+      // Solo el propietario puede leer sus métricas
+      allow read: if isAuthenticated() &&
+                    resource.data.userId == request.auth.uid;
+
+      // Solo usuarios autenticados pueden crear métricas
+      allow create: if isAuthenticated() &&
+                      request.resource.data.userId == request.auth.uid &&
+                      validTimestamp() &&
+                      stringSize(request.resource.data.name, 100) &&
+                      request.resource.data.value is number &&
+                      request.resource.data.value >= 0;
+
+      // Solo el propietario puede actualizar
+      allow update: if isAuthenticated() &&
+                      resource.data.userId == request.auth.uid &&
+                      request.resource.data.userId == resource.data.userId;
+
+      // Solo el propietario o admin puede eliminar
+      allow delete: if isOwner(resource.data.userId) || isAdmin();
+    }
+
+    // ===== WIDGET CONFIGS COLLECTION =====
+
+    match /widgetConfigs/{widgetId} {
+      // Solo el propietario puede leer sus configuraciones
+      allow read: if isAuthenticated() &&
+                    resource.data.userId == request.auth.uid;
+
+      // Solo usuarios autenticados pueden crear configuraciones
+      allow create: if isAuthenticated() &&
+                      request.resource.data.userId == request.auth.uid &&
+                      hasRequiredFields() &&
+                      validTimestamp() &&
+                      stringSize(request.resource.data.title, 100) &&
+                      request.resource.data.type in ['kpi', 'chart', 'table', 'custom'];
+
+      // Solo el propietario puede actualizar
+      allow update: if isAuthenticated() &&
+                      resource.data.userId == request.auth.uid &&
+                      request.resource.data.userId == resource.data.userId;
+
+      // Solo el propietario o admin puede eliminar
+      allow delete: if isOwner(resource.data.userId) || isAdmin();
+    }
+
+    // ===== SALES DATA COLLECTION =====
+
+    match /salesData/{saleId} {
+      // Solo el propietario puede leer sus datos
+      allow read: if isAuthenticated() &&
+                    resource.data.userId == request.auth.uid;
+
+      // Solo usuarios autenticados pueden crear datos de ventas
+      allow create: if isAuthenticated() &&
+                      request.resource.data.userId == request.auth.uid &&
+                      validTimestamp() &&
+                      stringSize(request.resource.data.productName, 200) &&
+                      request.resource.data.quantity is number &&
+                      request.resource.data.quantity > 0 &&
+                      request.resource.data.revenue is number &&
+                      request.resource.data.revenue >= 0;
+
+      // Solo el propietario o admin puede actualizar/eliminar
+      allow update, delete: if isOwner(resource.data.userId) || isAdmin();
+    }
+
+    // ===== COLLECTION GROUP: members =====
+    // Permitir Collection Group Query para que usuarios encuentren sus tenants
+    match /{path=**}/members/{memberId} {
+      // Permitir leer si el documento tiene el uid del usuario autenticado
+      // O si el memberId coincide con el uid
+      allow read: if isAuthenticated() &&
+                    (memberId == request.auth.uid ||
+                     resource.data.uid == request.auth.uid);
+    }
+
+    // ===== DENY ALL OTHER PATHS =====
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
